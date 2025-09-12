@@ -1,0 +1,7 @@
+{
+  "name": "AI Nutritional Label Analyzer & Advisor",
+  "description": "An AI-powered app that analyzes food nutrition labels from images. It provides health summaries, explains ingredients, and offers a conversational Q&A to help you make informed dietary choices.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
