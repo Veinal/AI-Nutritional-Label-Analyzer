@@ -17,6 +17,10 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface ChatSession {
+  sendMessage(message: string): Promise<string>;
+}
+
 export enum AppState {
   WELCOME,
   PROCESSING_OCR,

@@ -1,16 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
-// FIX: Removed unused GoogleGenAI import.
-import { Chat } from '@google/genai';
 import { ImageUploader } from './components/ImageUploader';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { ChatWindow } from './components/ChatWindow';
 import { Spinner } from './components/Spinner';
 import { WelcomeScreen } from './components/WelcomeScreen';
-import { analyzeNutritionLabel, startChatSession } from './services/geminiService';
-import { AnalysisResult, ChatMessage, AppState } from './types';
+import * as aiService from './services/aiService';
+import { AnalysisResult, ChatMessage, AppState, ChatSession } from './types';
 
-// FIX: Fix TypeScript error for 'window.Tesseract' by augmenting the global Window interface.
-// This correctly informs TypeScript that the Tesseract.js library, loaded via a script tag, attaches its API to the window object.
 declare global {
   interface Window {
     Tesseract: any;
@@ -22,13 +18,18 @@ const App: React.FC = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [ocrText, setOcrText] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const [chatSession, setChatSession] = useState<Chat | null>(null);
+  const [chatSession, setChatSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   
   const [appState, setAppState] = useState<AppState>(AppState.WELCOME);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [isOcrReady, setIsOcrReady] = useState(false);
+  const [serviceProvider, setServiceProvider] = useState<'Gemini' | 'OpenAI' | 'None'>('None');
+
+  useEffect(() => {
+    setServiceProvider(aiService.getAvailableServiceProvider());
+  }, []);
 
   useEffect(() => {
     const ocrCheckInterval = setInterval(() => {
@@ -65,7 +66,6 @@ const App: React.FC = () => {
     setChatSession(null);
 
     try {
-      // FIX: Use window.Tesseract to be explicit, matching the type declaration.
       const worker = await window.Tesseract.createWorker('eng', 1, {
           logger: m => {
               if (m.status === 'recognizing text') {
@@ -94,10 +94,10 @@ const App: React.FC = () => {
     setAppState(AppState.ANALYZING);
     setLoadingMessage('AI is analyzing the nutritional information...');
     try {
-      const result = await analyzeNutritionLabel(text);
+      const result = await aiService.analyzeNutritionLabel(text);
       setAnalysis(result);
       
-      const chat = await startChatSession(text);
+      const chat = await aiService.startChatSession(text);
       setChatSession(chat);
       setMessages([{ role: 'model', content: "Hello! I've analyzed this food label. Feel free to ask me any questions about its health implications, ingredients, or suitability for your diet." }]);
       setAppState(AppState.RESULTS);
@@ -119,23 +119,13 @@ const App: React.FC = () => {
   const handleSendMessage = async (userMessage: string) => {
     if (!chatSession) return;
 
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    const newMessages: ChatMessage[] = [...messages, { role: 'user', content: userMessage }];
+    setMessages(newMessages);
     setAppState(AppState.CHATTING);
     
     try {
-        const stream = await chatSession.sendMessageStream({ message: userMessage });
-        
-        let modelResponse = '';
-        setMessages(prev => [...prev, { role: 'model', content: '' }]);
-
-        for await (const chunk of stream) {
-            modelResponse += chunk.text;
-            setMessages(prev => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1].content = modelResponse;
-                return newMessages;
-            });
-        }
+        const modelResponse = await chatSession.sendMessage(userMessage);
+        setMessages([...newMessages, { role: 'model', content: modelResponse }]);
 
     } catch (err) {
         console.error(err);
@@ -159,6 +149,17 @@ const App: React.FC = () => {
   };
   
   const renderContent = () => {
+    if (serviceProvider === 'None') {
+        return (
+            <div className="text-center p-8 bg-red-900/50 rounded-lg max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold text-red-400 mb-4">Configuration Error</h2>
+                <p className="text-gray-200 mb-6">
+                    No AI provider API key found. Please add either <code>GEMINI_API_KEY</code> or <code>OPENAI_API_KEY</code> to your <code>.env.local</code> file.
+                </p>
+            </div>
+        );
+    }
+
     switch (appState) {
       case AppState.PROCESSING_OCR:
       case AppState.ANALYZING:
@@ -219,8 +220,8 @@ const App: React.FC = () => {
       <main className="flex-grow w-full max-w-7xl mx-auto flex flex-col items-center justify-center">
         {renderContent()}
       </main>
-      <footer className="w-full p-4 text-center text-gray-500 text-sm">
-        <p>Powered by Google Gemini & Tesseract.js. For informational purposes only.</p>
+      <footer className="w-full p-4 text-center text-gray-500 text.sm">
+        <p>ai nutritional label analyzer </p>
       </footer>
     </div>
   );
