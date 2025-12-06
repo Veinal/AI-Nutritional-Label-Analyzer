@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnalysisResult } from '../types';
 import { CheckCircleIcon, XCircleIcon } from './Icon';
-import { useLanguage } from '../contexts/LanguageContext';
 
 interface AnalysisDisplayProps {
     analysis: AnalysisResult | null;
@@ -54,8 +53,6 @@ const HealthScore: React.FC<{ score: number }> = ({ score }) => {
 
 
 export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imageUrl, onReset }) => {
-    const { t } = useLanguage();
-
     if (!analysis) return null;
 
     return (
@@ -66,7 +63,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                     onClick={onReset}
                     className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
                 >
-                    {t('newScan')}
+                    New Scan
                 </button>
             </div>
 
@@ -78,19 +75,19 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
             </div>
 
             <div className="text-center mb-8 flex flex-col items-center">
-                <h3 className="text-lg font-semibold text-gray-400 mb-2">{t('healthScore')}</h3>
+                <h3 className="text-lg font-semibold text-gray-400 mb-2">Health Score</h3>
                 <HealthScore score={analysis.healthScore} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <h3 className="text-xl font-semibold text-emerald-400 mb-3 flex items-center"><CheckCircleIcon className="w-6 h-6 mr-2" /> {t('pros')}</h3>
+                    <h3 className="text-xl font-semibold text-emerald-400 mb-3 flex items-center"><CheckCircleIcon className="w-6 h-6 mr-2" /> Pros</h3>
                     <ul className="space-y-2">
                         {analysis.pros.map((pro, i) => <li key={i} className="bg-gray-700/50 p-3 rounded-lg text-gray-300 animate-fade-in-up" style={{ animationDelay: `${100 * i}ms` }}>{pro}</li>)}
                     </ul>
                 </div>
                 <div>
-                    <h3 className="text-xl font-semibold text-red-400 mb-3 flex items-center"><XCircleIcon className="w-6 h-6 mr-2" /> {t('cons')}</h3>
+                    <h3 className="text-xl font-semibold text-red-400 mb-3 flex items-center"><XCircleIcon className="w-6 h-6 mr-2" /> Cons</h3>
                     <ul className="space-y-2">
                         {analysis.cons.map((con, i) => <li key={i} className="bg-gray-700/50 p-3 rounded-lg text-gray-300 animate-fade-in-up" style={{ animationDelay: `${100 * i}ms` }}>{con}</li>)}
                     </ul>
@@ -98,7 +95,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
             </div>
 
             <div>
-                <h3 className="text-xl font-semibold text-cyan-400 mb-3">{t('ingredients')}</h3>
+                <h3 className="text-xl font-semibold text-cyan-400 mb-3">Ingredient Analysis</h3>
                 <ul className="space-y-3">
                     {analysis.ingredientsAnalysis.map((item, i) => (
                         <li key={i} className="bg-gray-700/50 p-4 rounded-lg animate-fade-in-up" style={{ animationDelay: `${50 * i}ms` }}>

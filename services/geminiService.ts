@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, ChatSession as GeminiChat } from "@google/generative-ai";
+import { GoogleGenerativeAI, ChatSession as GeminiChat, Content } from "@google/generative-ai";
 import { AnalysisResult, ChatSession } from '../types';
 
 if (!process.env.API_KEY) {
@@ -40,63 +40,28 @@ const analysisSchema = {
 };
 
 
-export const analyzeNutritionLabel = async (text: string, language: string = 'en'): Promise<AnalysisResult> => {
+export const analyzeNutritionLabel = async (text: string): Promise<AnalysisResult> => {
   const prompt = `
     Analyze the following nutritional label text extracted via OCR. Provide a detailed analysis in JSON format.
     The text may contain errors from OCR, so interpret it intelligently.
-    CRITICAL: Provide the 'summary', 'pros', 'cons', and 'ingredientsAnalysis' explanations in the following language: ${language}.
-export const analyzeNutritionLabel = async (input: string | { image: string, mimeType: string }): Promise<AnalysisResult> => {
-  let promptParts: any[] = [];
-
-  const basePrompt = `
-    Analyze the nutritional label provided. Provide a detailed analysis in JSON format.
     The JSON output must conform to this schema: ${JSON.stringify(analysisSchema)}
+    
+    Nutritional Label Text:
+    ---
+    ${text}
+    ---
   `;
 
-  promptParts.push(basePrompt);
-
-  if (typeof input === 'string') {
-    // Text-based analysis (fallback or legacy)
-    promptParts.push(`
-        Nutritional Label Text:
-        ---
-        ${input}
-        ---
-      `);
-  } else {
-    // Image-based analysis
-    promptParts.push({
-      inlineData: {
-        data: input.image,
-        mimeType: input.mimeType
-      }
-    });
-  }
-
   try {
-    const result = await analysisModel.generateContent(promptParts);
+    const result = await analysisModel.generateContent(prompt);
     const response = result.response;
     const jsonString = response.text();
 
     const parsedResult = JSON.parse(jsonString);
     return parsedResult as AnalysisResult;
   } catch (error) {
-    console.error("Error analyzed nutrition label with Gemini:", error);
-    throw new Error("Failed to get a valid analysis from the AI. The label might be unreadable or the content is not a food label.");
-  }
-};
-
-
-export const startChatSession = async (contextText: string, language: string = 'en'): Promise<ChatSession> => {
-    // Clean up markdown code blocks if present
-    const cleanJsonString = jsonString.replace(/```json\n?|\n?```/g, '').trim();
-
-    const parsedResult = JSON.parse(cleanJsonString);
-    return parsedResult as AnalysisResult;
-  } catch (error: any) {
     console.error("Error analyzing nutrition label with Gemini:", error);
-    const errorMessage = error.message || error.toString();
-    throw new Error(`AI Analysis Failed: ${errorMessage}`);
+    throw new Error("Failed to get a valid analysis from the AI. The label might be unreadable or the content is not a food label.");
   }
 };
 
@@ -111,7 +76,6 @@ export const startChatSession = async (contextText: string): Promise<ChatSession
         Be helpful, clear, and avoid making definitive medical claims.
         Use simple language. Keep responses concise.
         Base your answers strictly on the provided nutritional information.
-        CRITICAL: Respond to the user in the following language: ${language}.
         
         Context: The user has just uploaded an image of a food label, and the extracted text is:
         ---

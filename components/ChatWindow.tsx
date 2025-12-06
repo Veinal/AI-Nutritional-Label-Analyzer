@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '../types';
 import { SendIcon, UserIcon, SparklesIcon } from './Icon';
-import { useLanguage } from '../contexts/LanguageContext';
 
 interface ChatWindowProps {
   messages: ChatMessage[];
@@ -30,7 +29,6 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
 export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { t } = useLanguage();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,7 +47,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage,
   return (
     <div className="bg-gray-800/50 rounded-2xl shadow-xl flex flex-col h-full max-h-[85vh]">
       <div className="p-4 border-b border-gray-700">
-        <h2 className="text-xl font-bold text-center">{t('chatHeader')}</h2>
+        <h2 className="text-xl font-bold text-center">Chat with AI Advisor</h2>
       </div>
       <div className="flex-grow p-4 overflow-y-auto">
         {messages.map((msg, i) => (
@@ -77,7 +75,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage,
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={t('chatPlaceholder')}
+            placeholder="Ask about allergens, diet plans..."
             className="w-full bg-transparent p-3 text-white placeholder-gray-400 focus:outline-none"
             disabled={isResponding}
           />
