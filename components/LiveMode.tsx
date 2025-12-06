@@ -90,7 +90,7 @@ export const LiveMode: React.FC<LiveModeProps> = ({ onClose, chatSession, onMess
             <div className="w-full flex justify-between items-center">
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-white font-semibold">Gemini Live</span>
+                    <span className="text-white font-semibold">Live Speech Mode</span>
                 </div>
                 <button onClick={onClose} className="p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700">
                     <X size={24} />
