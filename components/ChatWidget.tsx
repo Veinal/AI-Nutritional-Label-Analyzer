@@ -32,17 +32,27 @@ export const ChatWidget: React.FC<ChatWidgetProps> = (props) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`
-                    w-14 h-14 rounded-full shadow-2xl flex items-center justify-center 
-                    text-white transition-all duration-300 transform hover:scale-110
-                    ${isOpen ? 'bg-gray-700 rotate-90' : 'bg-gradient-to-r from-emerald-500 to-cyan-500 animate-pulse-slow'}
+                    group flex items-center justify-center
+                    h-14 bg-gradient-to-r from-emerald-500 to-cyan-500 
+                    rounded-full shadow-2xl text-white transition-all duration-300 transform 
+                    ${isOpen ? 'w-14 bg-gray-700 rotate-90' : 'w-14 hover:w-40 hover:justify-start hover:pl-4'}
                 `}
             >
-                {isOpen ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                ) : (
-                    <SparklesIcon className="w-8 h-8" />
+                <div className={`${isOpen ? 'rotate-90' : ''} transition-transform duration-300`}>
+                    {isOpen ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    ) : (
+                        <SparklesIcon className="w-8 h-8" />
+                    )}
+                </div>
+
+                {/* Text on hover */}
+                {!isOpen && (
+                    <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out whitespace-nowrap ml-0 group-hover:ml-3 text-sm font-bold opacity-0 group-hover:opacity-100">
+                        Chat with AI
+                    </span>
                 )}
             </button>
         </div>
