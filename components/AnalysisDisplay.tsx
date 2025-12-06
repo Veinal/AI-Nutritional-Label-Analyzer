@@ -68,7 +68,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
     if (!analysis) return null;
 
     return (
-        <div className="bg-gray-800/50 p-6 rounded-2xl shadow-xl flex flex-col h-full max-h-[85vh] overflow-y-auto animate-fade-in-scale-up custom-scrollbar">
+        <div className="bg-gray-800/50 p-6 rounded-2xl shadow-xl flex flex-col animate-fade-in-scale-up">
             <div className="flex justify-between items-start mb-6 sticky top-0 bg-gray-900/90 p-4 -m-4 rounded-t-2xl z-10 backdrop-blur-md border-b border-gray-700/50">
                 <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 truncate pr-4">{analysis.productName}</h2>
                 <button
