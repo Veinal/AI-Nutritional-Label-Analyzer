@@ -28,5 +28,6 @@ export enum AppState {
   ANALYZING,
   RESULTS,
   CHATTING,
+  LIVE_MODE,
   ERROR,
 }

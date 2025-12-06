@@ -5,7 +5,8 @@ import { ChatWindow } from './components/ChatWindow';
 import { Spinner } from './components/Spinner';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { CameraView } from './components/CameraView';
-import { Camera } from 'lucide-react';
+import { LiveMode } from './components/LiveMode';
+import { Camera, Mic } from 'lucide-react';
 import * as aiService from './services/aiService';
 import { AnalysisResult, ChatMessage, AppState, ChatSession } from './types';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -205,6 +206,16 @@ const AppContent: React.FC = () => {
             onClose={() => setAppState(AppState.WELCOME)}
           />
         );
+      case AppState.LIVE_MODE:
+        return (
+          <LiveMode
+            onClose={() => setAppState(AppState.RESULTS)}
+            chatSession={chatSession}
+            onMessage={(role, content) => {
+              setMessages(prev => [...prev, { role, content }]);
+            }}
+          />
+        );
       case AppState.PROCESSING_OCR:
       case AppState.ANALYZING:
         return (
@@ -227,6 +238,7 @@ const AppContent: React.FC = () => {
               messages={messages}
               onSendMessage={handleSendMessage}
               isResponding={appState === AppState.CHATTING}
+              onEnterLiveMode={() => setAppState(AppState.LIVE_MODE)}
             />
           </div>
         );

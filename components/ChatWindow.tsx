@@ -1,14 +1,15 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '../types';
 import { SendIcon, UserIcon, SparklesIcon } from './Icon';
+import { Mic } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface ChatWindowProps {
   messages: ChatMessage[];
   onSendMessage: (message: string) => void;
   isResponding: boolean;
+  onEnterLiveMode: () => void;
 }
 
 const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
@@ -27,7 +28,7 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
   );
 };
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding, onEnterLiveMode }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
@@ -48,8 +49,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage,
 
   return (
     <div className="bg-gray-800/50 rounded-2xl shadow-xl flex flex-col h-full max-h-[85vh]">
-      <div className="p-4 border-b border-gray-700">
-        <h2 className="text-xl font-bold text-center">{t('chatHeader')}</h2>
+      <div className="p-4 border-b border-gray-700 flex justify-between items-center">
+        <h2 className="text-xl font-bold">{t('chatHeader')}</h2>
+        <button
+          onClick={onEnterLiveMode}
+          className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center gap-2 text-sm font-medium"
+          title="Switch to Live Voice Mode"
+        >
+          <Mic size={16} />
+          <span className="hidden sm:inline">Live Mode</span>
+        </button>
       </div>
       <div className="flex-grow p-4 overflow-y-auto">
         {messages.map((msg, i) => (
