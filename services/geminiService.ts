@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, ChatSession as GeminiChat, Content } from "@google/generative-ai";
+import { GoogleGenerativeAI, ChatSession as GeminiChat } from "@google/generative-ai";
 import { AnalysisResult, ChatSession } from '../types';
 
 if (!process.env.API_KEY) {
@@ -45,16 +45,36 @@ export const analyzeNutritionLabel = async (text: string, language: string = 'en
     Analyze the following nutritional label text extracted via OCR. Provide a detailed analysis in JSON format.
     The text may contain errors from OCR, so interpret it intelligently.
     CRITICAL: Provide the 'summary', 'pros', 'cons', and 'ingredientsAnalysis' explanations in the following language: ${language}.
+export const analyzeNutritionLabel = async (input: string | { image: string, mimeType: string }): Promise<AnalysisResult> => {
+  let promptParts: any[] = [];
+
+  const basePrompt = `
+    Analyze the nutritional label provided. Provide a detailed analysis in JSON format.
     The JSON output must conform to this schema: ${JSON.stringify(analysisSchema)}
-    
-    Nutritional Label Text:
-    ---
-    ${text}
-    ---
   `;
 
+  promptParts.push(basePrompt);
+
+  if (typeof input === 'string') {
+    // Text-based analysis (fallback or legacy)
+    promptParts.push(`
+        Nutritional Label Text:
+        ---
+        ${input}
+        ---
+      `);
+  } else {
+    // Image-based analysis
+    promptParts.push({
+      inlineData: {
+        data: input.image,
+        mimeType: input.mimeType
+      }
+    });
+  }
+
   try {
-    const result = await analysisModel.generateContent(prompt);
+    const result = await analysisModel.generateContent(promptParts);
     const response = result.response;
     const jsonString = response.text();
 
@@ -68,6 +88,20 @@ export const analyzeNutritionLabel = async (text: string, language: string = 'en
 
 
 export const startChatSession = async (contextText: string, language: string = 'en'): Promise<ChatSession> => {
+    // Clean up markdown code blocks if present
+    const cleanJsonString = jsonString.replace(/```json\n?|\n?```/g, '').trim();
+
+    const parsedResult = JSON.parse(cleanJsonString);
+    return parsedResult as AnalysisResult;
+  } catch (error: any) {
+    console.error("Error analyzing nutrition label with Gemini:", error);
+    const errorMessage = error.message || error.toString();
+    throw new Error(`AI Analysis Failed: ${errorMessage}`);
+  }
+};
+
+
+export const startChatSession = async (contextText: string): Promise<ChatSession> => {
   const systemInstruction = {
     role: "system",
     parts: [{

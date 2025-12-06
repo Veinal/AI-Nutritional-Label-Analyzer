@@ -23,6 +23,7 @@ export interface ChatSession {
 
 export enum AppState {
   WELCOME,
+  CAMERA,
   PROCESSING_OCR,
   ANALYZING,
   RESULTS,

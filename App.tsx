@@ -4,6 +4,8 @@ import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { ChatWindow } from './components/ChatWindow';
 import { Spinner } from './components/Spinner';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import { CameraView } from './components/CameraView';
+import { Camera } from 'lucide-react';
 import * as aiService from './services/aiService';
 import { AnalysisResult, ChatMessage, AppState, ChatSession } from './types';
 
@@ -76,6 +78,7 @@ const AppContent: React.FC = () => {
           if (m.status === 'recognizing text') {
             const progress = (m.progress * 100).toFixed(0);
             setLoadingMessage(`${t('loadingOcr')} ${progress}%`);
+            setLoadingMessage(`Reading nutrition label... ${progress}%`);
           }
         },
       });
@@ -105,6 +108,7 @@ const AppContent: React.FC = () => {
 
       // Pass language to chat service
       const chat = await aiService.startChatSession(text, language);
+      const chat = await aiService.startChatSession(text);
       setChatSession(chat);
       setMessages([{ role: 'model', content: t('chatWelcome') }]);
       setAppState(AppState.RESULTS);
@@ -114,6 +118,35 @@ const AppContent: React.FC = () => {
       setAppState(AppState.ERROR);
     }
   }, [language, t]);
+
+  const processImage = useCallback(async (imageSrc: string) => {
+    setAppState(AppState.ANALYZING);
+    setLoadingMessage('AI is analyzing the label directly...');
+    setImageUrl(imageSrc); // Set the captured image for display
+
+    try {
+      // Extract base64 data
+      const base64Data = imageSrc.split(',')[1];
+      const mimeType = imageSrc.split(';')[0].split(':')[1];
+
+      const result = await aiService.analyzeNutritionLabel({ image: base64Data, mimeType });
+      setAnalysis(result);
+
+      // For chat context, we might need OCR or just pass a generic message if the chat model doesn't support images in history yet
+      // Ideally, we'd pass the image to the chat model too, but for now let's use the analysis summary as context
+      const context = `Product: ${result.productName}. Summary: ${result.summary}. Pros: ${result.pros.join(', ')}. Cons: ${result.cons.join(', ')}`;
+      const chat = await aiService.startChatSession(context);
+
+      setChatSession(chat);
+      setMessages([{ role: 'model', content: "Hello! I've analyzed this food label. Feel free to ask me any questions about its health implications, ingredients, or suitability for your diet." }]);
+      setAppState(AppState.RESULTS);
+
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : "An AI analysis error occurred.");
+      setAppState(AppState.ERROR);
+    }
+  }, []);
 
   useEffect(() => {
     if (ocrText && appState === AppState.PROCESSING_OCR) {
@@ -168,6 +201,13 @@ const AppContent: React.FC = () => {
     }
 
     switch (appState) {
+      case AppState.CAMERA:
+        return (
+          <CameraView
+            onCapture={processImage}
+            onClose={() => setAppState(AppState.WELCOME)}
+          />
+        );
       case AppState.PROCESSING_OCR:
       case AppState.ANALYZING:
         return (
@@ -197,12 +237,14 @@ const AppContent: React.FC = () => {
         return (
           <div className="text-center p-8 bg-red-900/50 rounded-lg max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-red-400 mb-4">{t('errorTitle')}</h2>
+            <h2 className="text-2xl font-bold text-red-400 mb-4">An Error Occurred</h2>
             <p className="text-gray-200 mb-6">{error}</p>
             <button
               onClick={handleReset}
               className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors"
             >
               {t('tryAgain')}
+              Try Again
             </button>
           </div>
         );
@@ -211,6 +253,23 @@ const AppContent: React.FC = () => {
         return (
           <WelcomeScreen>
             <ImageUploader onImageUpload={handleImageUpload} isOcrReady={isOcrReady} />
+            <div className="flex flex-col gap-4 w-full max-w-md">
+              <button
+                onClick={() => setAppState(AppState.CAMERA)}
+                className="flex items-center justify-center gap-3 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 shadow-lg"
+              >
+                <Camera size={24} />
+                <span>Scan Label with Camera</span>
+              </button>
+
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-gray-700"></div>
+                <span className="flex-shrink-0 mx-4 text-gray-500">OR</span>
+                <div className="flex-grow border-t border-gray-700"></div>
+              </div>
+
+              <ImageUploader onImageUpload={handleImageUpload} isOcrReady={isOcrReady} />
+            </div>
           </WelcomeScreen>
         );
     }
@@ -228,6 +287,11 @@ const AppContent: React.FC = () => {
         <div>
           <LanguageSelector />
         </div>
+      <header className="w-full p-4 text-center">
+        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">
+          AI Nutritional Label Analyzer
+        </h1>
+        <p className="text-gray-400 mt-1">Upload a nutrition label to get an instant health analysis.</p>
       </header>
       <main className="flex-grow w-full max-w-7xl mx-auto flex flex-col items-center justify-center">
         {renderContent()}
