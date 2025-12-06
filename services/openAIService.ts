@@ -35,11 +35,10 @@ const analysisSchema = {
     required: ["productName", "healthScore", "summary", "pros", "cons", "ingredientsAnalysis"]
 };
 
-export const analyzeNutritionLabel = async (text: string, language: string = 'en'): Promise<AnalysisResult> => {
+export const analyzeNutritionLabel = async (text: string): Promise<AnalysisResult> => {
     const prompt = `
     Analyze the following nutritional label text extracted via OCR. Provide a detailed analysis in JSON format.
     The text may contain errors from OCR, so interpret it intelligently.
-    CRITICAL: Provide the 'summary', 'pros', 'cons', and 'ingredientsAnalysis' explanations in the following language: ${language}.
     
     Nutritional Label Text:
     ---
@@ -53,7 +52,7 @@ export const analyzeNutritionLabel = async (text: string, language: string = 'en
             messages: [{ role: "user", content: prompt }],
             response_format: { type: "json_object" },
         });
-
+        
         const jsonString = response.choices[0].message.content;
         if (!jsonString) {
             throw new Error("OpenAI returned an empty response.");
@@ -70,7 +69,7 @@ class OpenAIChat {
     private context: string;
     private messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
 
-    constructor(contextText: string, language: string = 'en') {
+    constructor(contextText: string) {
         this.context = contextText;
         this.messages.push({
             role: "system",
@@ -80,7 +79,6 @@ class OpenAIChat {
                 Be helpful, clear, and avoid making definitive medical claims.
                 Use simple language. Keep responses concise.
                 Base your answers strictly on the provided nutritional information.
-                CRITICAL: Respond to the user in the following language: ${language}.
                 
                 Context: The user has just uploaded an image of a food label, and the extracted text is:
                 ---
@@ -112,6 +110,6 @@ class OpenAIChat {
     }
 }
 
-export const startChatSession = async (contextText: string, language: string = 'en') => {
-    return new OpenAIChat(contextText, language);
+export const startChatSession = async (contextText: string) => {
+    return new OpenAIChat(contextText);
 };

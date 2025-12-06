@@ -15,10 +15,7 @@ declare global {
   }
 }
 
-import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
-import { LanguageSelector } from './components/LanguageSelector';
-
-const AppContent: React.FC = () => {
+const App: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [ocrText, setOcrText] = useState<string | null>(null);
@@ -31,8 +28,6 @@ const AppContent: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isOcrReady, setIsOcrReady] = useState(false);
   const [serviceProvider, setServiceProvider] = useState<'Gemini' | 'OpenAI' | 'None'>('None');
-
-  const { t, language } = useLanguage();
 
   useEffect(() => {
     setServiceProvider(aiService.getAvailableServiceProvider());
@@ -65,7 +60,7 @@ const AppContent: React.FC = () => {
 
     setImageFile(file);
     setAppState(AppState.PROCESSING_OCR);
-    setLoadingMessage(t('loadingOcr'));
+    setLoadingMessage('Reading nutrition label...');
     setError(null);
     setAnalysis(null);
     setOcrText(null);
@@ -77,7 +72,6 @@ const AppContent: React.FC = () => {
         logger: m => {
           if (m.status === 'recognizing text') {
             const progress = (m.progress * 100).toFixed(0);
-            setLoadingMessage(`${t('loadingOcr')} ${progress}%`);
             setLoadingMessage(`Reading nutrition label... ${progress}%`);
           }
         },
@@ -87,7 +81,7 @@ const AppContent: React.FC = () => {
 
       const extractedText = ret.data.text;
       if (!extractedText || extractedText.trim().length < 20) {
-        throw new Error(t('ocrError'));
+        throw new Error("Could not extract sufficient text from the image. Please try a clearer picture.");
       }
       setOcrText(extractedText);
 
@@ -96,28 +90,25 @@ const AppContent: React.FC = () => {
       setError(err instanceof Error ? err.message : "An unknown OCR error occurred.");
       setAppState(AppState.ERROR);
     }
-  }, [isOcrReady, t]);
+  }, [isOcrReady]);
 
   const processOcrText = useCallback(async (text: string) => {
     setAppState(AppState.ANALYZING);
-    setLoadingMessage(t('loadingAnalysis'));
+    setLoadingMessage('AI is analyzing the nutritional information...');
     try {
-      // Pass language to analysis service
-      const result = await aiService.analyzeNutritionLabel(text, language);
+      const result = await aiService.analyzeNutritionLabel(text);
       setAnalysis(result);
 
-      // Pass language to chat service
-      const chat = await aiService.startChatSession(text, language);
       const chat = await aiService.startChatSession(text);
       setChatSession(chat);
-      setMessages([{ role: 'model', content: t('chatWelcome') }]);
+      setMessages([{ role: 'model', content: "Hello! I've analyzed this food label. Feel free to ask me any questions about its health implications, ingredients, or suitability for your diet." }]);
       setAppState(AppState.RESULTS);
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : t('analysisError'));
+      setError(err instanceof Error ? err.message : "An AI analysis error occurred.");
       setAppState(AppState.ERROR);
     }
-  }, [language, t]);
+  }, []);
 
   const processImage = useCallback(async (imageSrc: string) => {
     setAppState(AppState.ANALYZING);
@@ -236,14 +227,12 @@ const AppContent: React.FC = () => {
       case AppState.ERROR:
         return (
           <div className="text-center p-8 bg-red-900/50 rounded-lg max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-red-400 mb-4">{t('errorTitle')}</h2>
             <h2 className="text-2xl font-bold text-red-400 mb-4">An Error Occurred</h2>
             <p className="text-gray-200 mb-6">{error}</p>
             <button
               onClick={handleReset}
               className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors"
             >
-              {t('tryAgain')}
               Try Again
             </button>
           </div>
@@ -252,7 +241,6 @@ const AppContent: React.FC = () => {
       default:
         return (
           <WelcomeScreen>
-            <ImageUploader onImageUpload={handleImageUpload} isOcrReady={isOcrReady} />
             <div className="flex flex-col gap-4 w-full max-w-md">
               <button
                 onClick={() => setAppState(AppState.CAMERA)}
@@ -277,16 +265,6 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans flex flex-col items-center">
-      <header className="w-full p-4 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto">
-        <div className="text-center md:text-left mb-4 md:mb-0">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">
-            {t('appTitle')}
-          </h1>
-          <p className="text-gray-400 mt-1 text-sm">{t('appSubtitle')}</p>
-        </div>
-        <div>
-          <LanguageSelector />
-        </div>
       <header className="w-full p-4 text-center">
         <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">
           AI Nutritional Label Analyzer
@@ -297,17 +275,9 @@ const AppContent: React.FC = () => {
         {renderContent()}
       </main>
       <footer className="w-full p-4 text-center text-gray-500 text.sm">
-        <p>{t('appTitle')}</p>
+        <p>ai nutritional label analyzer </p>
       </footer>
     </div>
-  );
-};
-
-const App: React.FC = () => {
-  return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
   );
 };
 
