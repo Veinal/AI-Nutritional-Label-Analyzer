@@ -33,7 +33,7 @@ export const SugarCount: React.FC<SugarCountProps> = ({ grams, cubes }) => {
     return (
         <div className="bg-gradient-to-br from-gray-700/50 to-gray-800/50 p-6 rounded-xl border border-gray-700 backdrop-blur-sm shadow-xl animate-fade-in-up">
             <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                <span className="text-2xl"></span> {t('sugarLoad') || "Total Sugar Load"}
+                <span className="text-2xl"></span> {t('sugar cubes') || "Total Sugar Load"}
             </h3>
 
             <div className="flex flex-col gap-4">

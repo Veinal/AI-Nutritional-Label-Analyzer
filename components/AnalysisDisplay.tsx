@@ -158,6 +158,6 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
