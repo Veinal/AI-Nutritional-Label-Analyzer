@@ -9,17 +9,9 @@ interface ChatSession {
     sendMessage(message: string): Promise<string>;
 }
 
-export const analyzeNutritionLabel = async (text: string, language: string = 'en'): Promise<AnalysisResult> => {
+export const analyzeNutritionLabel = async (input: string | { image: string, mimeType: string }, language: string = 'en'): Promise<AnalysisResult> => {
     if (isGeminiAvailable()) {
-        return gemini.analyzeNutritionLabel(text, language);
-    }
-    if (isOpenAIAvailable()) {
-        return openai.analyzeNutritionLabel(text, language);
-    }
-    throw new Error("No AI provider API key configured. Please add GEMINI_API_KEY or OPENAI_API_KEY to your .env.local file.");
-export const analyzeNutritionLabel = async (input: string | { image: string, mimeType: string }): Promise<AnalysisResult> => {
-    if (isGeminiAvailable()) {
-        return gemini.analyzeNutritionLabel(input);
+        return gemini.analyzeNutritionLabel(input, language);
     }
     throw new Error("Gemini API key not configured. Please add GEMINI_API_KEY to your .env.local file.");
 };

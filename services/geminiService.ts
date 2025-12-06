@@ -40,17 +40,13 @@ const analysisSchema = {
 };
 
 
-export const analyzeNutritionLabel = async (text: string, language: string = 'en'): Promise<AnalysisResult> => {
-  const prompt = `
-    Analyze the following nutritional label text extracted via OCR. Provide a detailed analysis in JSON format.
-    The text may contain errors from OCR, so interpret it intelligently.
-    CRITICAL: Provide the 'summary', 'pros', 'cons', and 'ingredientsAnalysis' explanations in the following language: ${language}.
-export const analyzeNutritionLabel = async (input: string | { image: string, mimeType: string }): Promise<AnalysisResult> => {
+export const analyzeNutritionLabel = async (input: string | { image: string, mimeType: string }, language: string = 'en'): Promise<AnalysisResult> => {
   let promptParts: any[] = [];
 
   const basePrompt = `
     Analyze the nutritional label provided. Provide a detailed analysis in JSON format.
     The JSON output must conform to this schema: ${JSON.stringify(analysisSchema)}
+    CRITICAL: The output JSON values (summary, pros, cons, explanations) MUST be written in natural, fluent ${language}. Ensure the tone is helpful and accessible.
   `;
 
   promptParts.push(basePrompt);
@@ -78,16 +74,6 @@ export const analyzeNutritionLabel = async (input: string | { image: string, mim
     const response = result.response;
     const jsonString = response.text();
 
-    const parsedResult = JSON.parse(jsonString);
-    return parsedResult as AnalysisResult;
-  } catch (error) {
-    console.error("Error analyzed nutrition label with Gemini:", error);
-    throw new Error("Failed to get a valid analysis from the AI. The label might be unreadable or the content is not a food label.");
-  }
-};
-
-
-export const startChatSession = async (contextText: string, language: string = 'en'): Promise<ChatSession> => {
     // Clean up markdown code blocks if present
     const cleanJsonString = jsonString.replace(/```json\n?|\n?```/g, '').trim();
 
@@ -101,7 +87,7 @@ export const startChatSession = async (contextText: string, language: string = '
 };
 
 
-export const startChatSession = async (contextText: string): Promise<ChatSession> => {
+export const startChatSession = async (contextText: string, language: string = 'en'): Promise<ChatSession> => {
   const systemInstruction = {
     role: "system",
     parts: [{
@@ -111,7 +97,7 @@ export const startChatSession = async (contextText: string): Promise<ChatSession
         Be helpful, clear, and avoid making definitive medical claims.
         Use simple language. Keep responses concise.
         Base your answers strictly on the provided nutritional information.
-        CRITICAL: Respond to the user in the following language: ${language}.
+        CRITICAL: You must converse with the user in ${language}. Ensure your responses are natural, fluent, and culturally appropriate for a native speaker of this language. Do not just translate; think and respond in ${language}.
         
         Context: The user has just uploaded an image of a food label, and the extracted text is:
         ---
