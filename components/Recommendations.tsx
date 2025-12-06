@@ -16,34 +16,30 @@ export const Recommendations: React.FC<RecommendationsProps> = ({ items }) => {
 
     if (!items || items.length === 0) return null;
 
+    
     return (
-        <div className="mt-6 bg-gradient-to-br from-emerald-900/20 to-gray-800/50 p-6 rounded-xl border border-emerald-500/20 animate-fade-in-up delay-100">
-            <h3 className="text-xl font-semibold text-emerald-400 mb-4 flex items-center gap-2">
-                <span className="text-2xl">🌿</span> {t('healthierAlternatives') || "Healthier Alternatives"}
+        <div className="mt-8">
+            <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-3">
+                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 text-xl">🌿</span>
+                {t('healthierAlternatives') || "Healthier Alternatives"}
             </h3>
 
-            <div className="space-y-4">
+            <div className="grid gap-4">
                 {items.map((item, idx) => (
-                    <div key={idx} className="bg-gray-800/80 p-4 rounded-lg hover:bg-gray-800 transition-colors border border-gray-700/50 flex flex-col sm:flex-row sm:items-center gap-4 group">
+                    <div key={idx} className="bg-gradient-to-r from-gray-800/40 to-gray-800/20 p-5 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all hover:bg-gray-800/50 shadow-sm flex flex-col sm:flex-row sm:items-center gap-5 group">
                         <div className="flex-shrink-0">
-                            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center border-2 border-emerald-500/50 group-hover:border-emerald-400 transition-colors">
-                                <span className="font-bold text-emerald-400 text-lg">{item.score}</span>
+                            <div className="w-14 h-14 rounded-2xl bg-gray-900 flex items-center justify-center border border-emerald-500/20 group-hover:border-emerald-500/50 text-emerald-400 font-extrabold text-xl shadow-inner">
+                                {item.score}
                             </div>
                         </div>
 
                         <div className="flex-grow">
-                            <h4 className="font-bold text-white text-lg group-hover:text-emerald-300 transition-colors">{item.name}</h4>
-                            <p className="text-gray-400 text-sm mt-1 leading-relaxed">{item.reason}</p>
+                            <h4 className="font-bold text-gray-100 text-lg group-hover:text-emerald-300 transition-colors">{item.name}</h4>
+                            <p className="text-gray-400 text-sm mt-2 leading-relaxed">{item.reason}</p>
                         </div>
-
-                        {/* <div className="flex-shrink-0 self-start sm:self-center">
-                            <button className="text-xs font-semibold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-full transition-colors whitespace-nowrap">
-                                View Details
-                            </button>
-                        </div> */}
                     </div>
                 ))}
             </div>
         </div>
-    );
+    )
 };
