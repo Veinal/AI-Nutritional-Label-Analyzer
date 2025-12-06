@@ -21,7 +21,7 @@ export const Recommendations: React.FC<RecommendationsProps> = ({ items }) => {
         <div className="mt-8">
             <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-3">
                 <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 text-xl">🌿</span>
-                {t('healthier Alternatives') || "Healthier Alternatives"}
+                {t('Healthier Alternatives') || "healthier Alternatives"}
             </h3>
 
             <div className="grid gap-4">

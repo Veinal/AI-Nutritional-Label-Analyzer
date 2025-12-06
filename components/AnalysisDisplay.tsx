@@ -105,9 +105,9 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
     if (!analysis) return null;
 
     return (
-        <div className="bg-gray-800/40 backdrop-blur-xl p-8 rounded-3xl shadow-2xl flex flex-col animate-fade-in-scale-up border border-gray-700/50">
+        <div className="bg-gray-800/40 backdrop-blur-xl p-8 rounded-3xl shadow-2xl flex flex-col animate-fade-in-scale-up border border-gray-700/50 w-full">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b border-gray-700/50">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 border-b border-gray-700/50">
                 <div className="mb-4 md:mb-0">
                     <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 tracking-tight">
                         {analysis.productName}
@@ -125,11 +125,16 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
-                {/* Left Column: Visuals & Metrics (4 columns wide) */}
-                <div className="lg:col-span-4 flex flex-col gap-10">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 xl:gap-16 items-start">
+
+                {/* --- Left Column: Summary, Health Score, Image, Pros/Cons --- */}
+                <div className="flex flex-col gap-10">
+
+                    {/* Image & Health Score Row (or Stacked) */}
+                    {/* Let's stack them for cleanliness or put them side-by-side if space permits, but stacking is safer for alignment */}
+
                     {imageUrl && (
-                        <div className="relative group rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 aspect-w-1 aspect-h-1">
+                        <div className="relative group rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 aspect-w-16 aspect-h-9 md:aspect-none md:h-80">
                             <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-transparent to-transparent z-10"></div>
                             <img
                                 src={imageUrl}
@@ -139,6 +144,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                         </div>
                     )}
 
+                    {/* Health Score */}
                     <div className="bg-gray-900/40 p-8 rounded-3xl border border-white/5 shadow-inner backdrop-blur-md">
                         <div className="flex flex-col items-center text-center">
                             <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-gray-500 mb-8">{t('healthScore')}</h3>
@@ -146,13 +152,6 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                         </div>
                     </div>
 
-                    {analysis.sugarContent && (
-                        <SugarCount grams={analysis.sugarContent.grams} cubes={analysis.sugarContent.cubes} />
-                    )}
-                </div>
-
-                {/* Right Column: Detailed Analysis (8 columns wide) */}
-                <div className="lg:col-span-8 flex flex-col gap-10">
                     {/* Summary Card */}
                     <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 p-10 rounded-3xl border border-gray-700/50 shadow-xl relative overflow-hidden backdrop-blur-xl group hover:border-emerald-500/20 transition-colors duration-500">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none"></div>
@@ -164,7 +163,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                         </p>
                     </div>
 
-                    {/* Pros & Cons Grid */}
+                    {/* Pros & Cons Grid (Nested) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="bg-emerald-900/10 backdrop-blur-md p-8 rounded-3xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300 hover:bg-emerald-900/20">
                             <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-3">
@@ -197,49 +196,59 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                     </div>
 
                 </div>
-            </div>
 
-            {/* Full Width Sections: Ingredients & Recommendations */}
-            <div className="mt-12 flex flex-col gap-16">
-                {/* Ingredients Section */}
-                <div>
-                    <h3 className="text-2xl font-bold text-gray-200 mb-8 flex items-center gap-4">
-                        <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 text-2xl border border-cyan-500/20">🧬</span>
-                        {t('ingredients')}
-                    </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {(!analysis.ingredientsAnalysis || analysis.ingredientsAnalysis.length === 0) ? (
-                            <div className="col-span-1 md:col-span-2 bg-gray-800/30 p-16 rounded-3xl border border-gray-700/30 text-center flex flex-col items-center justify-center gap-6">
-                                <span className="text-6xl opacity-20 grayscale filter blur-sm">🥗</span>
-                                <div className="space-y-2 max-w-md mx-auto">
-                                    <p className="text-gray-300 font-medium text-xl">{t('noIngredientsFound') || "No specific ingredients analyzed"}</p>
-                                    <p className="text-gray-500">We couldn't find detailed ingredient information for this product.</p>
-                                </div>
-                            </div>
-                        ) : (
-                            analysis.ingredientsAnalysis.map((item, i) => (
-                                <div key={i} className="group bg-gray-800/40 hover:bg-gray-800/80 p-6 rounded-2xl transition-all duration-300 border border-gray-700/30 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-900/10 flex flex-col">
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
-                                        <strong className="text-gray-100 text-xl tracking-wide group-hover:text-cyan-400 transition-colors font-semibold">{item.ingredient}</strong>
-                                        {item.isGood ?
-                                            <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider self-start sm:self-auto shadow-sm">Safe</span> :
-                                            <span className="px-4 py-1.5 bg-red-500/10 text-red-400 text-xs rounded-full border border-red-500/20 font-bold uppercase tracking-wider self-start sm:self-auto shadow-sm">Attention</span>
-                                        }
+                {/* --- Right Column: Sugar, Ingredients, Recommendations --- */}
+                <div className="flex flex-col gap-10">
+
+                    {/* Sugar Count */}
+                    {analysis.sugarContent && (
+                        <div className="w-full">
+                            <SugarCount grams={analysis.sugarContent.grams} cubes={analysis.sugarContent.cubes} />
+                        </div>
+                    )}
+
+                    {/* Ingredients Section */}
+                    <div>
+                        <h3 className="text-2xl font-bold text-gray-200 mb-8 flex items-center gap-4">
+                            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 text-2xl border border-cyan-500/20">🧬</span>
+                            {t('ingredients')}
+                        </h3>
+
+                        <div className="grid gap-6">
+                            {(!analysis.ingredientsAnalysis || analysis.ingredientsAnalysis.length === 0) ? (
+                                <div className="bg-gray-800/30 p-16 rounded-3xl border border-gray-700/30 text-center flex flex-col items-center justify-center gap-6">
+                                    <span className="text-6xl opacity-20 grayscale filter blur-sm">🥗</span>
+                                    <div className="space-y-2 max-w-md mx-auto">
+                                        <p className="text-gray-300 font-medium text-xl">{t('noIngredientsFound') || "No specific ingredients analyzed"}</p>
+                                        <p className="text-gray-500">We couldn't find detailed ingredient information for this product.</p>
                                     </div>
-                                    <p className="text-gray-400 text-base leading-relaxed border-l-4 border-gray-700 pl-4 group-hover:border-cyan-500/50 transition-colors ml-1 flex-grow">{item.explanation}</p>
                                 </div>
-                            ))
-                        )}
+                            ) : (
+                                analysis.ingredientsAnalysis.map((item, i) => (
+                                    <div key={i} className="group bg-gray-800/40 hover:bg-gray-800/80 p-6 rounded-2xl transition-all duration-300 border border-gray-700/30 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-900/10 flex flex-col">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
+                                            <strong className="text-gray-100 text-xl tracking-wide group-hover:text-cyan-400 transition-colors font-semibold">{item.ingredient}</strong>
+                                            {item.isGood ?
+                                                <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider self-start sm:self-auto shadow-sm">Safe</span> :
+                                                <span className="px-4 py-1.5 bg-red-500/10 text-red-400 text-xs rounded-full border border-red-500/20 font-bold uppercase tracking-wider self-start sm:self-auto shadow-sm">Attention</span>
+                                            }
+                                        </div>
+                                        <p className="text-gray-400 text-base leading-relaxed border-l-4 border-gray-700 pl-4 group-hover:border-cyan-500/50 transition-colors ml-1 flex-grow">{item.explanation}</p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
+
+                    {/* Healthier Recommendations */}
+                    {analysis.recommendations && analysis.recommendations.length > 0 && (
+                        <div className="w-full">
+                            <Recommendations items={analysis.recommendations} />
+                        </div>
+                    )}
                 </div>
 
-                {/* Healthier Recommendations */}
-                {analysis.recommendations && analysis.recommendations.length > 0 && (
-                    <div className="grid grid-cols-1">
-                        <Recommendations items={analysis.recommendations} />
-                    </div>
-                )}
             </div>
         </div>
     );

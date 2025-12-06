@@ -217,7 +217,7 @@ const AppContent: React.FC = () => {
       case AppState.RESULTS:
       case AppState.CHATTING:
         return (
-          <div className="w-full p-4 md:p-8 max-w-5xl mx-auto">
+          <div className="w-full p-4 md:p-8 max-w-7xl mx-auto">
             <AnalysisDisplay
               analysis={analysis}
               imageUrl={imageUrl}
