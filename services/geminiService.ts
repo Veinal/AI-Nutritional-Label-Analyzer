@@ -2,13 +2,13 @@ import { GoogleGenerativeAI, ChatSession as GeminiChat, Content } from "@google/
 import { AnalysisResult, ChatSession } from '../types';
 
 if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set");
+  throw new Error("API_KEY environment variable is not set");
 }
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
 const analysisModel = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
+  model: "gemini-2.5-flash",
   generationConfig: { responseMimeType: "application/json" },
 });
 
@@ -56,7 +56,7 @@ export const analyzeNutritionLabel = async (text: string): Promise<AnalysisResul
     const result = await analysisModel.generateContent(prompt);
     const response = result.response;
     const jsonString = response.text();
-    
+
     const parsedResult = JSON.parse(jsonString);
     return parsedResult as AnalysisResult;
   } catch (error) {
@@ -67,10 +67,10 @@ export const analyzeNutritionLabel = async (text: string): Promise<AnalysisResul
 
 
 export const startChatSession = async (contextText: string): Promise<ChatSession> => {
-    const systemInstruction = {
-        role: "system",
-        parts: [{
-            text: `
+  const systemInstruction = {
+    role: "system",
+    parts: [{
+      text: `
         You are a friendly and knowledgeable nutritional advisor AI. 
         Your goal is to help users understand the food product based on its nutrition label, which has been provided as context.
         Be helpful, clear, and avoid making definitive medical claims.
@@ -82,23 +82,23 @@ export const startChatSession = async (contextText: string): Promise<ChatSession
         ${contextText}
         ---
     `}]
-    };
+  };
 
-    const chat: GeminiChat = chatModel.startChat({
-        systemInstruction: systemInstruction,
-        history: []
-    });
+  const chat: GeminiChat = chatModel.startChat({
+    systemInstruction: systemInstruction,
+    history: []
+  });
 
-    return {
-        async sendMessage(message: string): Promise<string> {
-            try {
-                const result = await chat.sendMessage(message);
-                const response = result.response;
-                return response.text();
-            } catch (error) {
-                console.error("Error sending message to Gemini:", error);
-                return "I'm sorry, I encountered an error. Please try again.";
-            }
-        }
-    };
+  return {
+    async sendMessage(message: string): Promise<string> {
+      try {
+        const result = await chat.sendMessage(message);
+        const response = result.response;
+        return response.text();
+      } catch (error) {
+        console.error("Error sending message to Gemini:", error);
+        return "I'm sorry, I encountered an error. Please try again.";
+      }
+    }
+  };
 };
