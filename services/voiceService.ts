@@ -9,6 +9,13 @@ interface VoiceService {
     isSpeaking: boolean;
 }
 
+const LANGUAGE_MAPPING: Record<string, string> = {
+    'en': 'en-US',
+    'hi': 'hi-IN',
+    'kn': 'kn-IN',
+    'mr': 'mr-IN'
+};
+
 export const useVoiceService = (): VoiceService => {
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -24,14 +31,17 @@ export const useVoiceService = (): VoiceService => {
         }
     }, []);
 
-    const startListening = useCallback((onResult: (text: string) => void, onError: (error: string) => void, language: string = 'en-US') => {
+    const startListening = useCallback((onResult: (text: string) => void, onError: (error: string) => void, language: string = 'en') => {
         if (!recognition) {
             onError("Speech recognition not supported in this browser.");
             return;
         }
 
         try {
-            recognition.lang = language;
+            const locale = LANGUAGE_MAPPING[language] || 'en-US';
+            recognition.lang = locale;
+            console.log(`Starting recognition with language: ${locale}`);
+
             recognition.onstart = () => setIsListening(true);
             recognition.onend = () => setIsListening(false);
             recognition.onerror = (event: any) => {
@@ -57,7 +67,7 @@ export const useVoiceService = (): VoiceService => {
         }
     }, [recognition]);
 
-    const speak = useCallback((text: string, language: string = 'en-US', onEnd?: () => void) => {
+    const speak = useCallback((text: string, language: string = 'en', onEnd?: () => void) => {
         if (!('speechSynthesis' in window)) {
             console.error("Text-to-speech not supported.");
             return;
@@ -67,9 +77,17 @@ export const useVoiceService = (): VoiceService => {
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = language;
+        const locale = LANGUAGE_MAPPING[language] || 'en-US';
+        utterance.lang = locale;
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
+
+        // Try to find a matching voice for the language
+        const voices = window.speechSynthesis.getVoices();
+        const matchingVoice = voices.find(voice => voice.lang === locale || voice.lang.startsWith(locale.split('-')[0]));
+        if (matchingVoice) {
+            utterance.voice = matchingVoice;
+        }
 
         utterance.onstart = () => setIsSpeaking(true);
         utterance.onend = () => {
