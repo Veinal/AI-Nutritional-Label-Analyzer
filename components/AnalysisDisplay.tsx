@@ -125,23 +125,23 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
                 {/* Left Column: Visuals & Metrics (4 columns wide) */}
-                <div className="lg:col-span-4 flex flex-col gap-8">
+                <div className="lg:col-span-4 flex flex-col gap-10">
                     {imageUrl && (
-                        <div className="relative group rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent z-10"></div>
+                        <div className="relative group rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 aspect-w-1 aspect-h-1">
+                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-transparent to-transparent z-10"></div>
                             <img
                                 src={imageUrl}
                                 alt="Nutrition label"
-                                className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+                                className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
                             />
                         </div>
                     )}
 
-                    <div className="bg-gray-900/40 p-6 rounded-2xl border border-white/5 shadow-inner">
+                    <div className="bg-gray-900/40 p-8 rounded-3xl border border-white/5 shadow-inner backdrop-blur-md">
                         <div className="flex flex-col items-center text-center">
-                            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-gray-500 mb-6">{t('healthScore')}</h3>
+                            <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-gray-500 mb-8">{t('healthScore')}</h3>
                             <HealthScore score={analysis.healthScore} explanation={analysis.healthScoreExplanation} />
                         </div>
                     </div>
@@ -152,43 +152,43 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                 </div>
 
                 {/* Right Column: Detailed Analysis (8 columns wide) */}
-                <div className="lg:col-span-8 space-y-8">
+                <div className="lg:col-span-8 flex flex-col gap-10">
                     {/* Summary Card */}
-                    <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 p-8 rounded-2xl border border-gray-700/50 shadow-lg relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                        <h3 className="text-2xl font-bold text-gray-100 mb-4 flex items-center gap-2 relative z-10">
+                    <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 p-10 rounded-3xl border border-gray-700/50 shadow-xl relative overflow-hidden backdrop-blur-xl group hover:border-emerald-500/20 transition-colors duration-500">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none"></div>
+                        <h3 className="text-3xl font-bold text-gray-100 mb-6 flex items-center gap-3 relative z-10">
                             Summary
                         </h3>
-                        <p className="text-gray-300 leading-relaxed text-lg relative z-10">
+                        <p className="text-gray-300 leading-loose text-lg relative z-10 font-light tracking-wide">
                             {analysis.summary}
                         </p>
                     </div>
 
                     {/* Pros & Cons Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-emerald-900/10 backdrop-blur-sm p-6 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-colors">
-                            <h3 className="text-lg font-bold text-emerald-400 mb-4 flex items-center gap-2">
-                                <CheckCircleIcon className="w-5 h-5" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="bg-emerald-900/10 backdrop-blur-md p-8 rounded-3xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300 hover:bg-emerald-900/20">
+                            <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-3">
+                                <CheckCircleIcon className="w-6 h-6" />
                                 {t('pros')}
                             </h3>
-                            <ul className="space-y-3">
+                            <ul className="space-y-4">
                                 {analysis.pros.map((pro, i) => (
-                                    <li key={i} className="flex items-start text-gray-300 text-sm leading-relaxed">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 mr-3 flex-shrink-0"></span>
+                                    <li key={i} className="flex items-start text-gray-300 text-base leading-relaxed">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 mt-2.5 mr-4 flex-shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
                                         {pro}
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                        <div className="bg-red-900/10 backdrop-blur-sm p-6 rounded-2xl border border-red-500/10 hover:border-red-500/30 transition-colors">
-                            <h3 className="text-lg font-bold text-red-400 mb-4 flex items-center gap-2">
-                                <XCircleIcon className="w-5 h-5" />
+                        <div className="bg-red-900/10 backdrop-blur-md p-8 rounded-3xl border border-red-500/10 hover:border-red-500/30 transition-all duration-300 hover:bg-red-900/20">
+                            <h3 className="text-xl font-bold text-red-400 mb-6 flex items-center gap-3">
+                                <XCircleIcon className="w-6 h-6" />
                                 {t('cons')}
                             </h3>
-                            <ul className="space-y-3">
+                            <ul className="space-y-4">
                                 {analysis.cons.map((con, i) => (
-                                    <li key={i} className="flex items-start text-gray-300 text-sm leading-relaxed">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 mr-3 flex-shrink-0"></span>
+                                    <li key={i} className="flex items-start text-gray-300 text-base leading-relaxed">
+                                        <span className="w-2 h-2 rounded-full bg-red-500 mt-2.5 mr-4 flex-shrink-0 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
                                         {con}
                                     </li>
                                 ))}
@@ -196,44 +196,50 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                         </div>
                     </div>
 
-                    {/* Ingredients Section */}
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-200 mb-6 flex items-center gap-3">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-500/10 text-xl">🧬</span>
-                            {t('ingredients')}
-                        </h3>
-
-                        <div className="grid gap-4">
-                            {(!analysis.ingredientsAnalysis || analysis.ingredientsAnalysis.length === 0) ? (
-                                <div className="bg-gray-800/30 p-12 rounded-2xl border border-gray-700/30 text-center flex flex-col items-center justify-center gap-4">
-                                    <span className="text-5xl opacity-30 grayscale">🥗</span>
-                                    <div className="space-y-1">
-                                        <p className="text-gray-300 font-medium text-lg">{t('no Ingredients Found') || "No specific ingredients analyzed"}</p>
-                                        <p className="text-gray-500 text-sm">We couldn't find detailed ingredient information for this product.</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                analysis.ingredientsAnalysis.map((item, i) => (
-                                    <div key={i} className="group bg-gray-800/30 hover:bg-gray-800/60 p-5 rounded-2xl transition-all border border-gray-700/30 hover:border-gray-600/50">
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
-                                            <strong className="text-gray-100 text-lg tracking-wide group-hover:text-cyan-400 transition-colors">{item.ingredient}</strong>
-                                            {item.isGood ?
-                                                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider self-start sm:self-auto">Safe</span> :
-                                                <span className="px-3 py-1 bg-red-500/10 text-red-400 text-xs rounded-full border border-red-500/20 font-bold uppercase tracking-wider self-start sm:self-auto">Attention</span>
-                                            }
-                                        </div>
-                                        <p className="text-gray-400 text-sm leading-relaxed border-l-2 border-gray-700 pl-3 group-hover:border-cyan-500/50 transition-colors">{item.explanation}</p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Healthier Recommendations */}
-                    {analysis.recommendations && analysis.recommendations.length > 0 && (
-                        <Recommendations items={analysis.recommendations} />
-                    )}
                 </div>
+            </div>
+
+            {/* Full Width Sections: Ingredients & Recommendations */}
+            <div className="mt-12 flex flex-col gap-16">
+                {/* Ingredients Section */}
+                <div>
+                    <h3 className="text-2xl font-bold text-gray-200 mb-8 flex items-center gap-4">
+                        <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 text-2xl border border-cyan-500/20">🧬</span>
+                        {t('ingredients')}
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {(!analysis.ingredientsAnalysis || analysis.ingredientsAnalysis.length === 0) ? (
+                            <div className="col-span-1 md:col-span-2 bg-gray-800/30 p-16 rounded-3xl border border-gray-700/30 text-center flex flex-col items-center justify-center gap-6">
+                                <span className="text-6xl opacity-20 grayscale filter blur-sm">🥗</span>
+                                <div className="space-y-2 max-w-md mx-auto">
+                                    <p className="text-gray-300 font-medium text-xl">{t('noIngredientsFound') || "No specific ingredients analyzed"}</p>
+                                    <p className="text-gray-500">We couldn't find detailed ingredient information for this product.</p>
+                                </div>
+                            </div>
+                        ) : (
+                            analysis.ingredientsAnalysis.map((item, i) => (
+                                <div key={i} className="group bg-gray-800/40 hover:bg-gray-800/80 p-6 rounded-2xl transition-all duration-300 border border-gray-700/30 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-900/10 flex flex-col">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
+                                        <strong className="text-gray-100 text-xl tracking-wide group-hover:text-cyan-400 transition-colors font-semibold">{item.ingredient}</strong>
+                                        {item.isGood ?
+                                            <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider self-start sm:self-auto shadow-sm">Safe</span> :
+                                            <span className="px-4 py-1.5 bg-red-500/10 text-red-400 text-xs rounded-full border border-red-500/20 font-bold uppercase tracking-wider self-start sm:self-auto shadow-sm">Attention</span>
+                                        }
+                                    </div>
+                                    <p className="text-gray-400 text-base leading-relaxed border-l-4 border-gray-700 pl-4 group-hover:border-cyan-500/50 transition-colors ml-1 flex-grow">{item.explanation}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Healthier Recommendations */}
+                {analysis.recommendations && analysis.recommendations.length > 0 && (
+                    <div className="grid grid-cols-1">
+                        <Recommendations items={analysis.recommendations} />
+                    </div>
+                )}
             </div>
         </div>
     );
