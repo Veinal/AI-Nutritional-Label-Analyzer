@@ -36,11 +36,11 @@ export const Recommendations: React.FC<RecommendationsProps> = ({ items }) => {
                             <p className="text-gray-400 text-sm mt-1 leading-relaxed">{item.reason}</p>
                         </div>
 
-                        <div className="flex-shrink-0 self-start sm:self-center">
+                        {/* <div className="flex-shrink-0 self-start sm:self-center">
                             <button className="text-xs font-semibold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-full transition-colors whitespace-nowrap">
                                 View Details
                             </button>
-                        </div>
+                        </div> */}
                     </div>
                 ))}
             </div>

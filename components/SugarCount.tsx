@@ -32,12 +32,8 @@ export const SugarCount: React.FC<SugarCountProps> = ({ grams, cubes }) => {
                         </div>
                     ))}
                     {hasPartial && (
-                        <div className={`w-8 h-8 ${colorClass} opacity-50 relative`} title="Partial cube">
-                            <div className="absolute bottom-0 left-0 w-full h-1/2 overflow-hidden">
-                                <CubeIcon className="w-full h-full2" />
-                            </div>
-                            {/* Simplified partial visualization: just smaller or faded */}
-                            <CubeIcon className="w-6 h-6" />
+                        <div className={`w-8 h-8 ${colorClass} opacity-50 relative transition-all hover:scale-110`} title="Partial cube">
+                            <CubeIcon className="w-full h-full drop-shadow-lg" />
                         </div>
                     )}
                 </div>
