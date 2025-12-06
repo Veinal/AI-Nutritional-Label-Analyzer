@@ -12,7 +12,7 @@ const analysisModel = genAI.getGenerativeModel({
   generationConfig: { responseMimeType: "application/json" },
 });
 
-const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const chatModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const analysisSchema = {
   type: "object",
