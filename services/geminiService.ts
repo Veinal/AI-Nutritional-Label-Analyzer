@@ -1,18 +1,18 @@
-import { GoogleGenerativeAI, ChatSession as GeminiChat, Content } from "@google/generative-ai";
+import { GoogleGenerativeAI, ChatSession as GeminiChat } from "@google/generative-ai";
 import { AnalysisResult, ChatSession } from '../types';
 
 if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set");
+  throw new Error("API_KEY environment variable is not set");
 }
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
 const analysisModel = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
+  model: "gemini-2.5-flash",
   generationConfig: { responseMimeType: "application/json" },
 });
 
-const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const chatModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const analysisSchema = {
   type: "object",
@@ -40,37 +40,57 @@ const analysisSchema = {
 };
 
 
-export const analyzeNutritionLabel = async (text: string): Promise<AnalysisResult> => {
-  const prompt = `
-    Analyze the following nutritional label text extracted via OCR. Provide a detailed analysis in JSON format.
-    The text may contain errors from OCR, so interpret it intelligently.
+export const analyzeNutritionLabel = async (input: string | { image: string, mimeType: string }): Promise<AnalysisResult> => {
+  let promptParts: any[] = [];
+
+  const basePrompt = `
+    Analyze the nutritional label provided. Provide a detailed analysis in JSON format.
     The JSON output must conform to this schema: ${JSON.stringify(analysisSchema)}
-    
-    Nutritional Label Text:
-    ---
-    ${text}
-    ---
   `;
 
+  promptParts.push(basePrompt);
+
+  if (typeof input === 'string') {
+    // Text-based analysis (fallback or legacy)
+    promptParts.push(`
+        Nutritional Label Text:
+        ---
+        ${input}
+        ---
+      `);
+  } else {
+    // Image-based analysis
+    promptParts.push({
+      inlineData: {
+        data: input.image,
+        mimeType: input.mimeType
+      }
+    });
+  }
+
   try {
-    const result = await analysisModel.generateContent(prompt);
+    const result = await analysisModel.generateContent(promptParts);
     const response = result.response;
     const jsonString = response.text();
-    
-    const parsedResult = JSON.parse(jsonString);
+
+    // Clean up markdown code blocks if present
+    const cleanJsonString = jsonString.replace(/```json\n?|\n?```/g, '').trim();
+
+    const parsedResult = JSON.parse(cleanJsonString);
     return parsedResult as AnalysisResult;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error analyzing nutrition label with Gemini:", error);
-    throw new Error("Failed to get a valid analysis from the AI. The label might be unreadable or the content is not a food label.");
+    const errorMessage = error.message || error.toString();
+    throw new Error(`AI Analysis Failed: ${errorMessage}`);
   }
 };
 
 
 export const startChatSession = async (contextText: string): Promise<ChatSession> => {
-    const systemInstruction = {
-        role: "system",
-        parts: [{
-            text: `
+  const systemInstruction = {
+    role: "system",
+    parts: [{
+      text: `
         You are a friendly and knowledgeable nutritional advisor AI. 
         Your goal is to help users understand the food product based on its nutrition label, which has been provided as context.
         Be helpful, clear, and avoid making definitive medical claims.
@@ -82,23 +102,23 @@ export const startChatSession = async (contextText: string): Promise<ChatSession
         ${contextText}
         ---
     `}]
-    };
+  };
 
-    const chat: GeminiChat = chatModel.startChat({
-        systemInstruction: systemInstruction,
-        history: []
-    });
+  const chat: GeminiChat = chatModel.startChat({
+    systemInstruction: systemInstruction,
+    history: []
+  });
 
-    return {
-        async sendMessage(message: string): Promise<string> {
-            try {
-                const result = await chat.sendMessage(message);
-                const response = result.response;
-                return response.text();
-            } catch (error) {
-                console.error("Error sending message to Gemini:", error);
-                return "I'm sorry, I encountered an error. Please try again.";
-            }
-        }
-    };
+  return {
+    async sendMessage(message: string): Promise<string> {
+      try {
+        const result = await chat.sendMessage(message);
+        const response = result.response;
+        return response.text();
+      } catch (error) {
+        console.error("Error sending message to Gemini:", error);
+        return "I'm sorry, I encountered an error. Please try again.";
+      }
+    }
+  };
 };
