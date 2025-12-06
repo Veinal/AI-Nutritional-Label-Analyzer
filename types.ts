@@ -10,6 +10,16 @@ export interface AnalysisResult {
     explanation: string;
     isGood: boolean;
   }>;
+  sugarContent: {
+    grams: number;
+    cubes: number;
+  };
+  healthScoreExplanation: string;
+  recommendations: Array<{
+    name: string;
+    score: number;
+    reason: string;
+  }>;
 }
 
 export interface ChatMessage {
