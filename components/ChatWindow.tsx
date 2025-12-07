@@ -1,14 +1,15 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '../types';
 import { SendIcon, UserIcon, SparklesIcon } from './Icon';
+import { Mic } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface ChatWindowProps {
   messages: ChatMessage[];
   onSendMessage: (message: string) => void;
   isResponding: boolean;
+  onEnterLiveMode: () => void;
   onClose?: () => void;
 }
 
@@ -28,7 +29,7 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
   );
 };
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding, onClose }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding, onEnterLiveMode,onClose }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
@@ -60,6 +61,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage,
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+          <button
+          onClick={onEnterLiveMode}
+          className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center gap-2 text-sm font-medium"
+          title="Switch to Live Voice Mode"
+        >
+          <Mic size={16} />
+          <span className="hidden sm:inline">Live Mode</span>
+        </button>
         )}
       </div>
       <div className="flex-grow p-4 overflow-y-auto">
