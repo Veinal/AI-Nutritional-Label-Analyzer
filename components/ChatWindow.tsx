@@ -29,7 +29,7 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
   );
 };
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding, onEnterLiveMode,onClose }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding, onEnterLiveMode, onClose }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
@@ -55,21 +55,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage,
           <SparklesIcon className="w-5 h-5 text-emerald-400" />
           {t('chatHeader')}
         </h2>
-        {onClose && (
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        <div className="flex items-center gap-2">
           <button
-          onClick={onEnterLiveMode}
-          className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center gap-2 text-sm font-medium"
-          title="Switch to Live Voice Mode"
-        >
-          <Mic size={16} />
-          <span className="hidden sm:inline">Live Mode</span>
-        </button>
-        )}
+            onClick={onEnterLiveMode}
+            className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center gap-2 text-sm font-medium"
+            title="Switch to Live Voice Mode"
+          >
+            <Mic size={16} />
+            <span className="hidden sm:inline">Live Mode</span>
+          </button>
+          {onClose && (
+            <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex-grow p-4 overflow-y-auto">
         {messages.map((msg, i) => (

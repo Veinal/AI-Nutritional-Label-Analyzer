@@ -153,7 +153,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                     </div>
 
                     {/* Summary Card */}
-                    <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 p-10 rounded-3xl border border-gray-700/50 shadow-xl relative overflow-hidden backdrop-blur-xl group hover:border-emerald-500/20 transition-colors duration-500">
+                    {/* <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 p-10 rounded-3xl border border-gray-700/50 shadow-xl relative overflow-hidden backdrop-blur-xl group hover:border-emerald-500/20 transition-colors duration-500">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none"></div>
                         <h3 className="text-3xl font-bold text-gray-100 mb-6 flex items-center gap-3 relative z-10">
                             Summary
@@ -161,7 +161,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                         <p className="text-gray-300 leading-loose text-lg relative z-10 font-light tracking-wide">
                             {analysis.summary}
                         </p>
-                    </div>
+                    </div> */}
 
                     {/* Pros & Cons Grid (Nested) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
