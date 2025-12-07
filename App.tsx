@@ -10,7 +10,7 @@ import { UserProfile } from './components/UserProfile';
 import { ChatHistory } from './components/ChatHistory';
 import { Camera, LogIn } from 'lucide-react';
 import { LiveMode } from './components/LiveMode';
-import { Camera, Mic } from 'lucide-react';
+import { Mic } from 'lucide-react';
 import * as aiService from './services/aiService';
 import { AnalysisResult, ChatMessage, AppState, ChatSession } from './types';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
