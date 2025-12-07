@@ -7,6 +7,7 @@ interface ChatWidgetProps {
     messages: ChatMessage[];
     onSendMessage: (message: string) => void;
     isResponding: boolean;
+    onEnterLiveMode: () => void;
 }
 
 export const ChatWidget: React.FC<ChatWidgetProps> = (props) => {
