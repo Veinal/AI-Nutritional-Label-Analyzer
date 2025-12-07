@@ -34,9 +34,31 @@ const analysisSchema = {
         },
         required: ["ingredient", "explanation", "isGood"]
       }
+    },
+    sugarContent: {
+      type: "object",
+      properties: {
+        grams: { type: "number", description: "Total sugar content in grams per serving (or per container if more appropriate)." },
+        cubes: { type: "number", description: "Total sugar content converted to sugar cubes (1 cube = 4g). Round to 1 decimal place." }
+      },
+      required: ["grams", "cubes"]
+    },
+    healthScoreExplanation: { type: "string", description: "A concise explanation (1-2 sentences) of why the product received this specific health score." },
+    recommendations: {
+      type: "array",
+      description: "List of 1-3 healthier alternative products.",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Name of the alternative product." },
+          score: { type: "integer", description: "Estimated health score of the alternative (0-100)." },
+          reason: { type: "string", description: "Why is this a better choice?" }
+        },
+        required: ["name", "score", "reason"]
+      }
     }
   },
-  required: ["productName", "healthScore", "summary", "pros", "cons", "ingredientsAnalysis"]
+  required: ["productName", "healthScore", "summary", "pros", "cons", "ingredientsAnalysis", "sugarContent", "healthScoreExplanation", "recommendations"]
 };
 
 
@@ -46,7 +68,8 @@ export const analyzeNutritionLabel = async (input: string | { image: string, mim
   const basePrompt = `
     Analyze the nutritional label provided. Provide a detailed analysis in JSON format.
     The JSON output must conform to this schema: ${JSON.stringify(analysisSchema)}
-    CRITICAL: The output JSON values (summary, pros, cons, explanations) MUST be written in natural, fluent ${language}. Ensure the tone is helpful and accessible.
+    CRITICAL: The output JSON values (summary, pros, cons, explanations, reasons) MUST be written in natural, fluent ${language}. Ensure the tone is helpful and accessible.
+    For sugar calculation: 1 sugar cube = 4g of sugar. If grams are not explicitly listed, estimate based on ingredients or standard values for this product type.
   `;
 
   promptParts.push(basePrompt);

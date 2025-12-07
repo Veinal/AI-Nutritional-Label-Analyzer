@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { ImageUploader } from './components/ImageUploader';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
-import { ChatWindow } from './components/ChatWindow';
+import { ChatWidget } from './components/ChatWidget';
 import { Spinner } from './components/Spinner';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { CameraView } from './components/CameraView';
@@ -228,13 +228,13 @@ const AppContent: React.FC = () => {
       case AppState.RESULTS:
       case AppState.CHATTING:
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full p-4 md:p-8">
+          <div className="w-full p-4 md:p-8 max-w-7xl mx-auto">
             <AnalysisDisplay
               analysis={analysis}
               imageUrl={imageUrl}
               onReset={handleReset}
             />
-            <ChatWindow
+            <ChatWidget
               messages={messages}
               onSendMessage={handleSendMessage}
               isResponding={appState === AppState.CHATTING}

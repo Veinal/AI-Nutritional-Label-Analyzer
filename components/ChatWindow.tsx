@@ -10,16 +10,17 @@ interface ChatWindowProps {
   onSendMessage: (message: string) => void;
   isResponding: boolean;
   onEnterLiveMode: () => void;
+  onClose?: () => void;
 }
 
 const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
   const isModel = message.role === 'model';
   return (
-    <div className={`flex items-start gap-3 my-4 ${isModel ? '' : 'flex-row-reverse'}`}>
+    <div className={`flex items-start gap-3 my-3 ${isModel ? '' : 'flex-row-reverse'}`}>
       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isModel ? 'bg-emerald-500' : 'bg-cyan-500'}`}>
         {isModel ? <SparklesIcon className="w-5 h-5 text-white" /> : <UserIcon className="w-5 h-5 text-white" />}
       </div>
-      <div className={`p-4 rounded-2xl max-w-lg ${isModel ? 'bg-gray-700 rounded-tl-none' : 'bg-blue-900/80 rounded-tr-none'}`}>
+      <div className={`p-3 rounded-2xl max-w-[85%] text-sm ${isModel ? 'bg-gray-700 rounded-tl-none' : 'bg-blue-900/80 rounded-tr-none'}`}>
         <div className="text-white whitespace-pre-wrap">
           <ReactMarkdown>{message.content}</ReactMarkdown>
         </div>
@@ -28,7 +29,7 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
   );
 };
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding, onEnterLiveMode }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage, isResponding, onEnterLiveMode,onClose }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
@@ -48,10 +49,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage,
   };
 
   return (
-    <div className="bg-gray-800/50 rounded-2xl shadow-xl flex flex-col h-full max-h-[85vh]">
-      <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-        <h2 className="text-xl font-bold">{t('chatHeader')}</h2>
-        <button
+    <div className="bg-gray-800 rounded-2xl shadow-2xl flex flex-col h-full border border-gray-700 overflow-hidden">
+      <div className="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900/50">
+        <h2 className="text-lg font-bold flex items-center gap-2">
+          <SparklesIcon className="w-5 h-5 text-emerald-400" />
+          {t('chatHeader')}
+        </h2>
+        {onClose && (
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <button
           onClick={onEnterLiveMode}
           className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center gap-2 text-sm font-medium"
           title="Switch to Live Voice Mode"
@@ -59,6 +69,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, onSendMessage,
           <Mic size={16} />
           <span className="hidden sm:inline">Live Mode</span>
         </button>
+        )}
       </div>
       <div className="flex-grow p-4 overflow-y-auto">
         {messages.map((msg, i) => (
