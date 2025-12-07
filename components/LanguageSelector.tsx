@@ -10,7 +10,7 @@ export const LanguageSelector: React.FC = () => {
             <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as Language)}
-                className="block w-full px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="block w-full px-4 py-2 text-sm text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
                 {languages.map((lang) => (
                     <option key={lang.code} value={lang.code}>
