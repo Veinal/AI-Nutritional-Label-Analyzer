@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { ImageUploader } from './components/ImageUploader';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
-import { ChatWindow } from './components/ChatWindow';
+import { ChatWidget } from './components/ChatWidget';
 import { Spinner } from './components/Spinner';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { CameraView } from './components/CameraView';
@@ -9,6 +9,8 @@ import { AuthModal } from './components/AuthModal';
 import { UserProfile } from './components/UserProfile';
 import { ChatHistory } from './components/ChatHistory';
 import { Camera, LogIn } from 'lucide-react';
+import { LiveMode } from './components/LiveMode';
+import { Camera, Mic } from 'lucide-react';
 import * as aiService from './services/aiService';
 import { AnalysisResult, ChatMessage, AppState, ChatSession } from './types';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -284,6 +286,16 @@ const AppContent: React.FC = () => {
             onClose={() => setAppState(AppState.WELCOME)}
           />
         );
+      case AppState.LIVE_MODE:
+        return (
+          <LiveMode
+            onClose={() => setAppState(AppState.RESULTS)}
+            chatSession={chatSession}
+            onMessage={(role, content) => {
+              setMessages(prev => [...prev, { role, content }]);
+            }}
+          />
+        );
       case AppState.PROCESSING_OCR:
       case AppState.ANALYZING:
         return (
@@ -296,16 +308,17 @@ const AppContent: React.FC = () => {
       case AppState.RESULTS:
       case AppState.CHATTING:
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full p-4 md:p-8">
+          <div className="w-full p-4 md:p-8 max-w-7xl mx-auto">
             <AnalysisDisplay
               analysis={analysis}
               imageUrl={imageUrl}
               onReset={handleReset}
             />
-            <ChatWindow
+            <ChatWidget
               messages={messages}
               onSendMessage={handleSendMessage}
               isResponding={appState === AppState.CHATTING}
+              onEnterLiveMode={() => setAppState(AppState.LIVE_MODE)}
             />
           </div>
         );
