@@ -5,12 +5,19 @@ import { ChatWidget } from './components/ChatWidget';
 import { Spinner } from './components/Spinner';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { CameraView } from './components/CameraView';
+import { AuthModal } from './components/AuthModal';
+import { UserProfile } from './components/UserProfile';
+import { ChatHistory } from './components/ChatHistory';
+import { Camera, LogIn } from 'lucide-react';
 import { LiveMode } from './components/LiveMode';
 import { Camera, Mic } from 'lucide-react';
 import * as aiService from './services/aiService';
 import { AnalysisResult, ChatMessage, AppState, ChatSession } from './types';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageSelector } from './components/LanguageSelector';
+import { createChatSession, saveChatMessage, ChatHistory as ChatHistoryType } from './services/databaseService';
+import { UserMenu } from './components/UserMenu';
 
 declare global {
   interface Window {
@@ -25,14 +32,20 @@ const AppContent: React.FC = () => {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [chatSession, setChatSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   const [appState, setAppState] = useState<AppState>(AppState.WELCOME);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [isOcrReady, setIsOcrReady] = useState(false);
   const [serviceProvider, setServiceProvider] = useState<'Gemini' | 'OpenAI' | 'None'>('None');
+  
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showChatHistory, setShowChatHistory] = useState(false);
 
   const { t, language } = useLanguage();
+  const { user, loading: authLoading, signOut } = useAuth();
 
   useEffect(() => {
     setServiceProvider(aiService.getAvailableServiceProvider());
@@ -105,17 +118,31 @@ const AppContent: React.FC = () => {
       const result = await aiService.analyzeNutritionLabel(text, language);
       setAnalysis(result);
 
+      // Create chat session in database if user is logged in
+      let sessionId: string | null = null;
+      if (user) {
+        sessionId = await createChatSession(result.productName, text, result);
+        setCurrentSessionId(sessionId);
+      }
+
       // Pass language to chat service
       const chat = await aiService.startChatSession(text, language);
       setChatSession(chat);
-      setMessages([{ role: 'model', content: t('chatWelcome') }]);
+      const welcomeMessage = { role: 'model' as const, content: t('chatWelcome') };
+      setMessages([welcomeMessage]);
+      
+      // Save welcome message to database
+      if (sessionId) {
+        await saveChatMessage(sessionId, welcomeMessage);
+      }
+      
       setAppState(AppState.RESULTS);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : t('analysisError'));
       setAppState(AppState.ERROR);
     }
-  }, [language, t]);
+  }, [language, t, user]);
 
   const processImage = useCallback(async (imageSrc: string) => {
     setAppState(AppState.ANALYZING);
@@ -130,13 +157,27 @@ const AppContent: React.FC = () => {
       const result = await aiService.analyzeNutritionLabel({ image: base64Data, mimeType }, language);
       setAnalysis(result);
 
+      // Create chat session in database if user is logged in
+      let sessionId: string | null = null;
+      if (user) {
+        sessionId = await createChatSession(result.productName, null, result);
+        setCurrentSessionId(sessionId);
+      }
+
       // For chat context, we might need OCR or just pass a generic message if the chat model doesn't support images in history yet
       // Ideally, we'd pass the image to the chat model too, but for now let's use the analysis summary as context
       const context = `Product: ${result.productName}. Summary: ${result.summary}. Pros: ${result.pros.join(', ')}. Cons: ${result.cons.join(', ')}`;
       const chat = await aiService.startChatSession(context, language);
 
       setChatSession(chat);
-      setMessages([{ role: 'model', content: t('chatWelcome') }]);
+      const welcomeMessage = { role: 'model' as const, content: t('chatWelcome') };
+      setMessages([welcomeMessage]);
+      
+      // Save welcome message to database
+      if (sessionId) {
+        await saveChatMessage(sessionId, welcomeMessage);
+      }
+      
       setAppState(AppState.RESULTS);
 
     } catch (err) {
@@ -144,7 +185,7 @@ const AppContent: React.FC = () => {
       setError(err instanceof Error ? err.message : "An AI analysis error occurred.");
       setAppState(AppState.ERROR);
     }
-  }, [language, t]);
+  }, [language, t, user]);
 
   useEffect(() => {
     if (ocrText && appState === AppState.PROCESSING_OCR) {
@@ -157,18 +198,36 @@ const AppContent: React.FC = () => {
   const handleSendMessage = async (userMessage: string) => {
     if (!chatSession) return;
 
-    const newMessages: ChatMessage[] = [...messages, { role: 'user', content: userMessage }];
+    const userMsg: ChatMessage = { role: 'user', content: userMessage };
+    const newMessages: ChatMessage[] = [...messages, userMsg];
     setMessages(newMessages);
     setAppState(AppState.CHATTING);
 
+    // Save user message to database
+    if (currentSessionId) {
+      await saveChatMessage(currentSessionId, userMsg);
+    }
+
     try {
       const modelResponse = await chatSession.sendMessage(userMessage);
-      setMessages([...newMessages, { role: 'model', content: modelResponse }]);
+      const modelMsg: ChatMessage = { role: 'model', content: modelResponse };
+      setMessages([...newMessages, modelMsg]);
+      
+      // Save model response to database
+      if (currentSessionId) {
+        await saveChatMessage(currentSessionId, modelMsg);
+      }
 
     } catch (err) {
       console.error(err);
       const errorMessage = "Sorry, I encountered an error. Please try again.";
-      setMessages(prev => [...prev, { role: 'model', content: errorMessage }]);
+      const errorMsg: ChatMessage = { role: 'model', content: errorMessage };
+      setMessages(prev => [...prev, errorMsg]);
+      
+      // Save error message to database
+      if (currentSessionId) {
+        await saveChatMessage(currentSessionId, errorMsg);
+      }
     } finally {
       setAppState(AppState.RESULTS);
     }
@@ -181,9 +240,30 @@ const AppContent: React.FC = () => {
     setAnalysis(null);
     setChatSession(null);
     setMessages([]);
+    setCurrentSessionId(null);
     setAppState(AppState.WELCOME);
     setLoadingMessage('');
     setError(null);
+  };
+
+  const handleLoadChatSession = (session: ChatHistoryType) => {
+    setAnalysis(session.analysis_data);
+    setMessages(session.messages || []);
+    setCurrentSessionId(session.id);
+    setOcrText(session.ocr_text);
+    setAppState(AppState.RESULTS);
+    
+    // Recreate chat session with the OCR text or analysis data
+    const context = session.ocr_text || 
+      (session.analysis_data ? 
+        `Product: ${session.analysis_data.productName}. Summary: ${session.analysis_data.summary}` : 
+        '');
+    
+    if (context) {
+      aiService.startChatSession(context, language).then(chat => {
+        setChatSession(chat);
+      });
+    }
   };
 
   const renderContent = () => {
@@ -281,6 +361,17 @@ const AppContent: React.FC = () => {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white font-sans flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+          <p className="mt-4 text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans flex flex-col items-center">
       <header className="w-full p-4 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto">
@@ -290,8 +381,24 @@ const AppContent: React.FC = () => {
           </h1>
           <p className="text-gray-400 mt-1 text-sm">{t('appSubtitle')}</p>
         </div>
-        <div>
+        <div className="flex items-center gap-3">
           <LanguageSelector />
+          {user && (
+             <UserMenu
+                onShowHistory={() => setShowChatHistory(true)}
+                onShowProfile={() => setShowUserProfile(true)}
+                onSignOut={signOut}
+              />
+          )}
+          {!user && (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+            >
+              <LogIn size={20} />
+              <span>Sign In</span>
+            </button>
+          )}
         </div>
       </header>
       <main className="flex-grow w-full max-w-7xl mx-auto flex flex-col items-center justify-center">
@@ -300,15 +407,32 @@ const AppContent: React.FC = () => {
       <footer className="w-full p-4 text-center text-gray-500 text.sm">
         <p>{t('appTitle')}</p>
       </footer>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => setShowAuthModal(false)}
+      />
+      <UserProfile
+        isOpen={showUserProfile}
+        onClose={() => setShowUserProfile(false)}
+      />
+      <ChatHistory
+        isOpen={showChatHistory}
+        onClose={() => setShowChatHistory(false)}
+        onLoadSession={handleLoadChatSession}
+      />
     </div>
   );
 };
 
 const App: React.FC = () => {
   return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
+    </AuthProvider>
   );
 };
 

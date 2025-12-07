@@ -152,6 +152,9 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, imag
                         </div>
                     </div>
 
+
+
+                    {/* Pros & Cons Grid (Nested) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="bg-emerald-900/10 backdrop-blur-md p-8 rounded-3xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300 hover:bg-emerald-900/20">
                             <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-3">

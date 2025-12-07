@@ -9,8 +9,8 @@ export const languages: { code: Language; name: string }[] = [
 
 export const translations: Record<Language, Record<string, string>> = {
     en: {
-        appTitle: "AI Nutritional Label Analyzer",
-        appSubtitle: "Upload a nutrition label to get an instant health analysis.",
+        appTitle: "Nutri-Talk",
+        appSubtitle: "AI Nutritional Label Analyzer",
         uploadButton: "Upload Label Image",
         dragDrop: "or drag and drop here",
         loadingOcr: "Reading nutrition label...",
